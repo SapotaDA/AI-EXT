@@ -18,7 +18,21 @@
   <div class="content">
     <!-- Summarize Tab -->
     <div id="tab-summarize" class="tab-content active">
-      <button id="summarize-btn" class="primary-btn">Summarize Current Page</button>
+      <div class="action-bar">
+        <select id="summary-lang-select" class="dropdown-input">
+          <option value="English">English</option>
+          <option value="Simple English">Simple English</option>
+          <option value="Hindi">Hindi (हिन्दी)</option>
+          <option value="Tamil">Tamil (தமிழ்)</option>
+          <option value="Telugu">Telugu (తెలుగు)</option>
+          <option value="Marathi">Marathi (मराठी)</option>
+          <option value="Bengali">Bengali (বাংলা)</option>
+          <option value="Gujarati">Gujarati (ગુજરાતી)</option>
+          <option value="Kannada">Kannada (ಕನ್ನಡ)</option>
+          <option value="Malayalam">Malayalam (മലയാളം)</option>
+        </select>
+        <button id="summarize-btn" class="primary-btn">Summarize</button>
+      </div>
       
       <div id="summarize-loading" class="loading-container hidden">
         <div class="spinner"></div>

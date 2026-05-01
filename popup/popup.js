@@ -18,12 +18,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load Settings
   const apiKeyInput = document.getElementById('api-key-input');
   const languageSelect = document.getElementById('language-select');
+  const summaryLangSelect = document.getElementById('summary-lang-select');
   
   getApiKey().then(key => {
     if (key) apiKeyInput.value = key;
   });
   getPreferredLanguage().then(lang => {
-    if (lang) languageSelect.value = lang;
+    if (lang) {
+      languageSelect.value = lang;
+      summaryLangSelect.value = lang;
+    }
   });
 
   // Save Settings
@@ -93,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      const lang = await getPreferredLanguage();
+      const lang = summaryLangSelect.value;
       const prompts = summarizePrompt(content, lang);
       const stream = streamLLM(prompts.system, prompts.user);
       
