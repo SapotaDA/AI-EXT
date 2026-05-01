@@ -30,10 +30,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Save Settings
+  // Save Settings — also sync the summary dropdown
   document.getElementById('save-settings-btn').addEventListener('click', () => {
     const key = apiKeyInput.value.trim();
     const lang = languageSelect.value;
+    
+    // Sync summary dropdown to match settings
+    summaryLangSelect.value = lang;
     
     chrome.storage.local.set({ geminiApiKey: key, preferredLanguage: lang }, () => {
       const status = document.getElementById('settings-status');
@@ -46,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
   async function getActiveTabContent() {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     
-    // Inject content script if not already injected
     try {
       const response = await chrome.tabs.sendMessage(tab.id, { action: "get-page-content" });
       return { content: response.content, url: tab.url };
@@ -85,8 +87,11 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error("Could not extract enough content from this page.");
       }
 
-      // Smart Caching check
-      const cacheKey = "summary_" + url;
+      // FIX: Read language DIRECTLY from the dropdown (no storage dependency)
+      const lang = summaryLangSelect.value;
+
+      // FIX: Cache key now includes language so switching languages always re-fetches
+      const cacheKey = `summary_${lang}_${url}`;
       const cached = await new Promise(resolve => chrome.storage.local.get([cacheKey], res => resolve(res[cacheKey])));
       
       if (cached) {
@@ -97,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      const lang = summaryLangSelect.value;
       const prompts = summarizePrompt(content, lang);
       const stream = streamLLM(prompts.system, prompts.user);
       
@@ -111,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         summarizeResult.innerHTML = formatMarkdown(fullText);
       }
       
-      // Save to cache
+      // Save to language-specific cache
       chrome.storage.local.set({ [cacheKey]: fullText });
 
     } catch (error) {
@@ -158,7 +162,8 @@ document.addEventListener('DOMContentLoaded', () => {
         pageContentCache = content;
       }
 
-      const lang = await getPreferredLanguage();
+      // FIX: Read language from settings dropdown directly (works instantly, no save needed)
+      const lang = languageSelect.value;
       const prompts = qaPrompt(pageContentCache, question, lang);
       const stream = streamLLM(prompts.system, prompts.user);
       
