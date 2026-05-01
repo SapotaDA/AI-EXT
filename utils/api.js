@@ -41,78 +41,51 @@ export async function* streamLLM(systemInstruction, userPrompt) {
   const modelName = await getModelName(apiKey);
   const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/${modelName}:streamGenerateContent?alt=sse&key=${apiKey}`;
   
-  // Auto-retry logic for rate limits (max 2 retries)
-  let lastError = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      const response = await fetch(GEMINI_API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ role: "user", parts: [{ text: `System Instructions: ${systemInstruction}\n\nUser Input: ${userPrompt}` }] }],
-          generationConfig: { temperature: 0.7 }
-        })
-      });
+  const response = await fetch(GEMINI_API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ role: "user", parts: [{ text: `System Instructions: ${systemInstruction}\n\nUser Input: ${userPrompt}` }] }],
+      generationConfig: { temperature: 0.7 }
+    })
+  });
 
-      if (response.status === 429) {
-        // Rate limited — wait and retry
-        const waitTime = (attempt + 1) * 15; // 15s, 30s, 45s
-        await new Promise(r => setTimeout(r, waitTime * 1000));
-        continue;
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        const errMsg = errorData.error?.message || `HTTP Error ${response.status}`;
-        if (errMsg.includes("quota") || errMsg.includes("rate")) {
-          const waitTime = (attempt + 1) * 15;
-          await new Promise(r => setTimeout(r, waitTime * 1000));
-          continue;
-        }
-        throw new Error(errMsg);
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder("utf-8");
-      let buffer = "";
-
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop();
-
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const dataStr = line.replace("data: ", "").trim();
-            if (!dataStr) continue;
-            try {
-              const data = JSON.parse(dataStr);
-              if (data.candidates && data.candidates.length > 0) {
-                yield data.candidates[0].content.parts[0].text;
-              }
-            } catch (e) {
-              // ignore incomplete JSON
-            }
-          }
-        }
-      }
-      return; // Success — exit the retry loop
-
-    } catch (e) {
-      lastError = e;
-      if (e.message.includes("quota") || e.message.includes("rate")) {
-        const waitTime = (attempt + 1) * 15;
-        await new Promise(r => setTimeout(r, waitTime * 1000));
-        continue;
-      }
-      throw e;
+  if (response.status === 429 || !response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const errMsg = errorData.error?.message || `HTTP Error ${response.status}`;
+    if (response.status === 429 || errMsg.includes("quota") || errMsg.includes("rate") || errMsg.includes("demand")) {
+      throw new Error("⏳ Rate limited! Free tier allows 15 requests/min. Please wait 30 seconds and try again.");
     }
+    throw new Error(errMsg);
   }
 
-  throw lastError || new Error("Rate limit exceeded. Please wait a minute and try again.");
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder("utf-8");
+  let buffer = "";
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop();
+
+    for (const line of lines) {
+      if (line.startsWith("data: ")) {
+        const dataStr = line.replace("data: ", "").trim();
+        if (!dataStr) continue;
+        try {
+          const data = JSON.parse(dataStr);
+          if (data.candidates && data.candidates.length > 0) {
+            yield data.candidates[0].content.parts[0].text;
+          }
+        } catch (e) {
+          // ignore incomplete JSON
+        }
+      }
+    }
+  }
 }
 
 export async function getPreferredLanguage() {
@@ -148,13 +121,13 @@ Structure your response exactly like this:
 - Point 3
 **Insights**: One or two interesting observations or implications from the text.
 
-Content: ${content.substring(0, 15000)}` 
+Content: ${content.substring(0, 8000)}` 
   };
 };
 
 export const qaPrompt = (context, question, lang = "English") => {
   return {
     system: `You are a strict AI assistant reading a specific document. Answer ONLY using the provided context. If the context does not contain the answer, say 'I cannot find the answer to this question in the page content.' Do not use outside knowledge. IMPORTANT: You MUST respond entirely in ${lang}. If the language is "Simple English", use extremely basic vocabulary.`,
-    user: `Context:\n${context.substring(0, 15000)}\n\nQuestion: ${question}`
+    user: `Context:\n${context.substring(0, 8000)}\n\nQuestion: ${question}`
   };
 };
