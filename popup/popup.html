@@ -55,6 +55,22 @@
         <input type="password" id="api-key-input" placeholder="AIza..." />
         <p class="help-text">Your key is stored securely in Chrome's local storage.</p>
       </div>
+      <div class="settings-group" style="margin-top: 15px;">
+        <label for="language-select">Preferred Language:</label>
+        <select id="language-select" class="dropdown-input">
+          <option value="English">English</option>
+          <option value="Simple English">Simple English (Easy to understand)</option>
+          <option value="Hindi">Hindi (हिन्दी)</option>
+          <option value="Tamil">Tamil (தமிழ்)</option>
+          <option value="Telugu">Telugu (తెలుగు)</option>
+          <option value="Marathi">Marathi (मराठी)</option>
+          <option value="Bengali">Bengali (বাংলা)</option>
+          <option value="Gujarati">Gujarati (ગુજરાતી)</option>
+          <option value="Kannada">Kannada (ಕನ್ನಡ)</option>
+          <option value="Malayalam">Malayalam (മലയാളം)</option>
+        </select>
+        <p class="help-text">All AI responses and translations will use this language.</p>
+      </div>
       <button id="save-settings-btn" class="primary-btn">Save Settings</button>
       <div id="settings-status" class="status-msg hidden">Saved!</div>
     </div>

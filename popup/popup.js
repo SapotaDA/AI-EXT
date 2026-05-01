@@ -1,4 +1,4 @@
-import { getApiKey, streamLLM, summarizePrompt, qaPrompt } from '../utils/api.js';
+import { getApiKey, getPreferredLanguage, streamLLM, summarizePrompt, qaPrompt } from '../utils/api.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Tab Switching
@@ -17,14 +17,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Load Settings
   const apiKeyInput = document.getElementById('api-key-input');
+  const languageSelect = document.getElementById('language-select');
+  
   getApiKey().then(key => {
     if (key) apiKeyInput.value = key;
+  });
+  getPreferredLanguage().then(lang => {
+    if (lang) languageSelect.value = lang;
   });
 
   // Save Settings
   document.getElementById('save-settings-btn').addEventListener('click', () => {
     const key = apiKeyInput.value.trim();
-    chrome.storage.local.set({ geminiApiKey: key }, () => {
+    const lang = languageSelect.value;
+    
+    chrome.storage.local.set({ geminiApiKey: key, preferredLanguage: lang }, () => {
       const status = document.getElementById('settings-status');
       status.classList.remove('hidden');
       setTimeout(() => status.classList.add('hidden'), 2000);
@@ -86,7 +93,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      const prompts = summarizePrompt(content);
+      const lang = await getPreferredLanguage();
+      const prompts = summarizePrompt(content, lang);
       const stream = streamLLM(prompts.system, prompts.user);
       
       let fullText = "";
@@ -146,7 +154,8 @@ document.addEventListener('DOMContentLoaded', () => {
         pageContentCache = content;
       }
 
-      const prompts = qaPrompt(pageContentCache, question);
+      const lang = await getPreferredLanguage();
+      const prompts = qaPrompt(pageContentCache, question, lang);
       const stream = streamLLM(prompts.system, prompts.user);
       
       let fullText = "";

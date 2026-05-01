@@ -1,5 +1,4 @@
-// background.js
-import { explainPrompt, streamLLM } from './utils/api.js';
+import { explainPrompt, streamLLM, getPreferredLanguage } from './utils/api.js';
 
 // Setup Context Menus
 chrome.runtime.onInstalled.addListener(() => {
@@ -49,7 +48,8 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   });
 
   try {
-    const prompts = explainPrompt(text, mode);
+    const lang = await getPreferredLanguage();
+    const prompts = explainPrompt(text, mode, lang);
     const stream = streamLLM(prompts.system, prompts.user);
     
     let fullText = "";

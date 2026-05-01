@@ -75,22 +75,30 @@ export async function* streamLLM(systemInstruction, userPrompt) {
   }
 }
 
+export async function getPreferredLanguage() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(['preferredLanguage'], (result) => {
+      resolve(result.preferredLanguage || 'English');
+    });
+  });
+}
+
 // Prompt functions
-export const explainPrompt = (text, mode) => {
+export const explainPrompt = (text, mode, lang = "English") => {
   let instruction = "Explain the following text clearly and concisely.";
   if (mode === "simple") instruction = "Explain the following text in very simple terms, avoiding jargon.";
   if (mode === "eli5") instruction = "Explain the following text as if I am 5 years old. Use an analogy if helpful.";
   if (mode === "bullets") instruction = "Summarize the following text using 3-5 key bullet points.";
   
   return {
-    system: "You are a highly intelligent and helpful AI research assistant.",
+    system: `You are a highly intelligent and helpful AI research assistant. IMPORTANT: You MUST respond entirely in ${lang}. If the language is "Simple English", use extremely basic vocabulary.`,
     user: `${instruction}\n\nText: "${text}"`
   };
 };
 
-export const summarizePrompt = (content) => {
+export const summarizePrompt = (content, lang = "English") => {
   return {
-    system: "You are an expert reading comprehension AI and content summarizer.",
+    system: `You are an expert reading comprehension AI and content summarizer. IMPORTANT: You MUST respond entirely in ${lang}. If the language is "Simple English", use extremely basic vocabulary.`,
     user: `Please thoroughly analyze and summarize the following webpage content. 
 Structure your response exactly like this:
 **Short Summary**: A 2-3 sentence overview.
@@ -104,9 +112,9 @@ Content: ${content.substring(0, 15000)}`
   };
 };
 
-export const qaPrompt = (context, question) => {
+export const qaPrompt = (context, question, lang = "English") => {
   return {
-    system: "You are a strict AI assistant reading a specific document. Answer ONLY using the provided context. If the context does not contain the answer, say 'I cannot find the answer to this question in the page content.' Do not use outside knowledge.",
+    system: `You are a strict AI assistant reading a specific document. Answer ONLY using the provided context. If the context does not contain the answer, say 'I cannot find the answer to this question in the page content.' Do not use outside knowledge. IMPORTANT: You MUST respond entirely in ${lang}. If the language is "Simple English", use extremely basic vocabulary.`,
     user: `Context:\n${context.substring(0, 15000)}\n\nQuestion: ${question}`
   };
 };
