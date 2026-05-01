@@ -531,8 +531,11 @@ body {
 /* ===== Chat ===== */
 #tab-chat {
   padding: 0;
-  display: flex;
   flex-direction: column;
+}
+
+#tab-chat.active {
+  display: flex;
 }
 
 .chat-container {
