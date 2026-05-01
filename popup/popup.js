@@ -190,7 +190,18 @@ document.addEventListener('DOMContentLoaded', () => {
   function appendMessage(text, className) {
     const msgDiv = document.createElement('div');
     msgDiv.className = `message ${className}`;
-    msgDiv.innerHTML = text;
+    
+    const avatar = document.createElement('div');
+    avatar.className = 'msg-avatar';
+    avatar.textContent = className === 'user-msg' ? '👤' : '🤖';
+    
+    const bubble = document.createElement('div');
+    bubble.className = 'msg-bubble';
+    bubble.innerHTML = text;
+    
+    msgDiv.appendChild(avatar);
+    msgDiv.appendChild(bubble);
+    
     const id = 'msg-' + Date.now();
     msgDiv.id = id;
     chatContainer.appendChild(msgDiv);
@@ -201,7 +212,12 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateMessage(id, text) {
     const msgDiv = document.getElementById(id);
     if (msgDiv) {
-      msgDiv.innerHTML = text;
+      const bubble = msgDiv.querySelector('.msg-bubble');
+      if (bubble) {
+        bubble.innerHTML = text;
+      } else {
+        msgDiv.innerHTML = text;
+      }
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
   }

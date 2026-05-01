@@ -2,91 +2,155 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <div class="header">
-    <h2>AI Research Assistant</h2>
-  </div>
-  
-  <div class="tabs">
-    <button class="tab-btn active" data-target="tab-summarize">Summarize</button>
-    <button class="tab-btn" data-target="tab-chat">Chat</button>
-    <button class="tab-btn" data-target="tab-settings">Settings</button>
+  <!-- Animated background blobs -->
+  <div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
   </div>
 
-  <div class="content">
-    <!-- Summarize Tab -->
-    <div id="tab-summarize" class="tab-content active">
-      <div class="action-bar">
-        <select id="summary-lang-select" class="dropdown-input">
-          <option value="English">English</option>
-          <option value="Simple English">Simple English</option>
-          <option value="Hindi">Hindi (हिन्दी)</option>
-          <option value="Tamil">Tamil (தமிழ்)</option>
-          <option value="Telugu">Telugu (తెలుగు)</option>
-          <option value="Marathi">Marathi (मराठी)</option>
-          <option value="Bengali">Bengali (বাংলা)</option>
-          <option value="Gujarati">Gujarati (ગુજરાતી)</option>
-          <option value="Kannada">Kannada (ಕನ್ನಡ)</option>
-          <option value="Malayalam">Malayalam (മലയാളം)</option>
-        </select>
-        <button id="summarize-btn" class="primary-btn">Summarize</button>
-      </div>
-      
-      <div id="summarize-loading" class="loading-container hidden">
-        <div class="spinner"></div>
-        <span>Analyzing page content...</span>
-      </div>
-      
-      <div id="summarize-result-container" class="hidden">
-        <div class="result-actions">
-          <span class="result-title">Summary</span>
-          <button id="summarize-copy-btn" class="icon-btn">Copy</button>
+  <div class="app-container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-content">
+        <div class="logo-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+            <path d="M2 17l10 5 10-5"></path>
+            <path d="M2 12l10 5 10-5"></path>
+          </svg>
         </div>
-        <div id="summarize-result" class="markdown-content"></div>
-      </div>
-    </div>
-
-    <!-- Chat Tab -->
-    <div id="tab-chat" class="tab-content">
-      <div class="chat-container" id="chat-container">
-        <div class="message system-msg">
-          Hello! Ask me anything about this webpage.
+        <div>
+          <h1>AI Research Assistant</h1>
+          <p class="header-subtitle">Powered by Gemini AI</p>
         </div>
       </div>
-      
-      <div class="chat-input-area">
-        <input type="text" id="chat-input" placeholder="Ask a question..." />
-        <button id="chat-send-btn" class="primary-btn">Send</button>
-      </div>
+    </div>
+    
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" data-target="tab-summarize">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+        Summarize
+      </button>
+      <button class="tab-btn" data-target="tab-chat">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        Chat
+      </button>
+      <button class="tab-btn" data-target="tab-settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        Settings
+      </button>
     </div>
 
-    <!-- Settings Tab -->
-    <div id="tab-settings" class="tab-content">
-      <div class="settings-group">
-        <label for="api-key-input">Gemini API Key (Free):</label>
-        <input type="password" id="api-key-input" placeholder="AIza..." />
-        <p class="help-text">Your key is stored securely in Chrome's local storage.</p>
+    <div class="content">
+      <!-- Summarize Tab -->
+      <div id="tab-summarize" class="tab-content active">
+        <div class="action-bar">
+          <div class="select-wrapper">
+            <select id="summary-lang-select" class="dropdown-input">
+              <option value="English">🌐 English</option>
+              <option value="Simple English">📖 Simple English</option>
+              <option value="Hindi">🇮🇳 Hindi (हिन्दी)</option>
+              <option value="Tamil">🇮🇳 Tamil (தமிழ்)</option>
+              <option value="Telugu">🇮🇳 Telugu (తెలుగు)</option>
+              <option value="Marathi">🇮🇳 Marathi (मराठी)</option>
+              <option value="Bengali">🇮🇳 Bengali (বাংলা)</option>
+              <option value="Gujarati">🇮🇳 Gujarati (ગુજરાતી)</option>
+              <option value="Kannada">🇮🇳 Kannada (ಕನ್ನಡ)</option>
+              <option value="Malayalam">🇮🇳 Malayalam (മലയാളം)</option>
+            </select>
+          </div>
+          <button id="summarize-btn" class="primary-btn glow-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            Summarize
+          </button>
+        </div>
+        
+        <div id="summarize-loading" class="loading-container hidden">
+          <div class="pulse-loader">
+            <div class="pulse-ring"></div>
+            <div class="pulse-ring"></div>
+            <div class="pulse-ring"></div>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pulse-icon"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          </div>
+          <span class="loading-text">Analyzing page content<span class="dot-anim">...</span></span>
+        </div>
+        
+        <div id="summarize-result-container" class="result-card hidden">
+          <div class="result-header">
+            <div class="result-title-group">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+              <span class="result-title">Summary</span>
+            </div>
+            <button id="summarize-copy-btn" class="copy-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copy
+            </button>
+          </div>
+          <div id="summarize-result" class="markdown-content"></div>
+        </div>
       </div>
-      <div class="settings-group" style="margin-top: 15px;">
-        <label for="language-select">Preferred Language:</label>
-        <select id="language-select" class="dropdown-input">
-          <option value="English">English</option>
-          <option value="Simple English">Simple English (Easy to understand)</option>
-          <option value="Hindi">Hindi (हिन्दी)</option>
-          <option value="Tamil">Tamil (தமிழ்)</option>
-          <option value="Telugu">Telugu (తెలుగు)</option>
-          <option value="Marathi">Marathi (मराठी)</option>
-          <option value="Bengali">Bengali (বাংলা)</option>
-          <option value="Gujarati">Gujarati (ગુજરાતી)</option>
-          <option value="Kannada">Kannada (ಕನ್ನಡ)</option>
-          <option value="Malayalam">Malayalam (മലയാളം)</option>
-        </select>
-        <p class="help-text">All AI responses and translations will use this language.</p>
+
+      <!-- Chat Tab -->
+      <div id="tab-chat" class="tab-content">
+        <div class="chat-container" id="chat-container">
+          <div class="message system-msg">
+            <div class="msg-avatar">🤖</div>
+            <div class="msg-bubble">Hello! Ask me anything about this webpage.</div>
+          </div>
+        </div>
+        
+        <div class="chat-input-area">
+          <input type="text" id="chat-input" placeholder="Ask a question about this page..." />
+          <button id="chat-send-btn" class="send-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+          </button>
+        </div>
       </div>
-      <button id="save-settings-btn" class="primary-btn">Save Settings</button>
-      <div id="settings-status" class="status-msg hidden">Saved!</div>
+
+      <!-- Settings Tab -->
+      <div id="tab-settings" class="tab-content">
+        <div class="settings-card">
+          <div class="settings-icon">🔑</div>
+          <label for="api-key-input">Gemini API Key</label>
+          <input type="password" id="api-key-input" placeholder="AIza..." />
+          <p class="help-text">Free from <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a></p>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-icon">🌍</div>
+          <label for="language-select">Default Language</label>
+          <select id="language-select" class="dropdown-input">
+            <option value="English">🌐 English</option>
+            <option value="Simple English">📖 Simple English</option>
+            <option value="Hindi">🇮🇳 Hindi (हिन्दी)</option>
+            <option value="Tamil">🇮🇳 Tamil (தமிழ்)</option>
+            <option value="Telugu">🇮🇳 Telugu (తెలుగు)</option>
+            <option value="Marathi">🇮🇳 Marathi (मराठी)</option>
+            <option value="Bengali">🇮🇳 Bengali (বাংলা)</option>
+            <option value="Gujarati">🇮🇳 Gujarati (ગુજરાતી)</option>
+            <option value="Kannada">🇮🇳 Kannada (ಕನ್ನಡ)</option>
+            <option value="Malayalam">🇮🇳 Malayalam (മലయാളം)</option>
+          </select>
+          <p class="help-text">Used for Chat tab and right-click Explain feature.</p>
+        </div>
+
+        <button id="save-settings-btn" class="primary-btn glow-btn save-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          Save Settings
+        </button>
+        <div id="settings-status" class="status-msg hidden">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          Settings saved successfully!
+        </div>
+      </div>
     </div>
   </div>
 
