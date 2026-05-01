@@ -9,70 +9,110 @@ export async function getApiKey() {
   });
 }
 
-export async function* streamLLM(systemInstruction, userPrompt) {
-  const apiKey = await getApiKey();
-  if (!apiKey) {
-    throw new Error("API Key not found. Please set your free Gemini API key in the extension settings.");
-  }
+// Cache the model name so we don't waste API quota on ListModels every time
+let cachedModelName = null;
+
+async function getModelName(apiKey) {
+  if (cachedModelName) return cachedModelName;
 
   const modelsRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
   const modelsData = await modelsRes.json();
   if (!modelsRes.ok) throw new Error(modelsData.error?.message || "Failed to list models.");
   if (!modelsData.models || modelsData.models.length === 0) throw new Error("No models available.");
 
-  let selectedModelName = "";
   const validModels = modelsData.models.filter(m => m.supportedGenerationMethods?.includes("generateContent"));
-  const flashModel = validModels.find(m => m.name.includes("gemini-1.5-flash"));
-  const proModel = validModels.find(m => m.name.includes("gemini-1.5-pro"));
+  const flash = validModels.find(m => m.name.includes("flash"));
+  const pro = validModels.find(m => m.name.includes("pro"));
   
-  if (flashModel) selectedModelName = flashModel.name;
-  else if (proModel) selectedModelName = proModel.name;
-  else if (validModels.length > 0) selectedModelName = validModels[0].name;
+  if (flash) cachedModelName = flash.name;
+  else if (pro) cachedModelName = pro.name;
+  else if (validModels.length > 0) cachedModelName = validModels[0].name;
   else throw new Error("No compatible models found.");
 
-  const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/${selectedModelName}:streamGenerateContent?alt=sse&key=${apiKey}`;
-  
-  const response = await fetch(GEMINI_API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [{ role: "user", parts: [{ text: `System Instructions: ${systemInstruction}\n\nUser Input: ${userPrompt}` }] }],
-      generationConfig: { temperature: 0.7 }
-    })
-  });
+  return cachedModelName;
+}
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error?.message || `HTTP Error ${response.status}`);
+export async function* streamLLM(systemInstruction, userPrompt) {
+  const apiKey = await getApiKey();
+  if (!apiKey) {
+    throw new Error("API Key not found. Please set your free Gemini API key in the extension settings.");
   }
 
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder("utf-8");
-  let buffer = "";
+  const modelName = await getModelName(apiKey);
+  const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/${modelName}:streamGenerateContent?alt=sse&key=${apiKey}`;
+  
+  // Auto-retry logic for rate limits (max 2 retries)
+  let lastError = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const response = await fetch(GEMINI_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: `System Instructions: ${systemInstruction}\n\nUser Input: ${userPrompt}` }] }],
+          generationConfig: { temperature: 0.7 }
+        })
+      });
 
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split("\n");
-    buffer = lines.pop(); // Keep incomplete line
+      if (response.status === 429) {
+        // Rate limited — wait and retry
+        const waitTime = (attempt + 1) * 15; // 15s, 30s, 45s
+        await new Promise(r => setTimeout(r, waitTime * 1000));
+        continue;
+      }
 
-    for (const line of lines) {
-      if (line.startsWith("data: ")) {
-        const dataStr = line.replace("data: ", "").trim();
-        if (!dataStr) continue;
-        try {
-          const data = JSON.parse(dataStr);
-          if (data.candidates && data.candidates.length > 0) {
-            yield data.candidates[0].content.parts[0].text;
+      if (!response.ok) {
+        const errorData = await response.json();
+        const errMsg = errorData.error?.message || `HTTP Error ${response.status}`;
+        if (errMsg.includes("quota") || errMsg.includes("rate")) {
+          const waitTime = (attempt + 1) * 15;
+          await new Promise(r => setTimeout(r, waitTime * 1000));
+          continue;
+        }
+        throw new Error(errMsg);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let buffer = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            const dataStr = line.replace("data: ", "").trim();
+            if (!dataStr) continue;
+            try {
+              const data = JSON.parse(dataStr);
+              if (data.candidates && data.candidates.length > 0) {
+                yield data.candidates[0].content.parts[0].text;
+              }
+            } catch (e) {
+              // ignore incomplete JSON
+            }
           }
-        } catch (e) {
-          // ignore incomplete JSON chunks that might be sent
         }
       }
+      return; // Success — exit the retry loop
+
+    } catch (e) {
+      lastError = e;
+      if (e.message.includes("quota") || e.message.includes("rate")) {
+        const waitTime = (attempt + 1) * 15;
+        await new Promise(r => setTimeout(r, waitTime * 1000));
+        continue;
+      }
+      throw e;
     }
   }
+
+  throw lastError || new Error("Rate limit exceeded. Please wait a minute and try again.");
 }
 
 export async function getPreferredLanguage() {
