@@ -1,5 +1,5 @@
 // background.js
-import { explainPrompt, callLLM } from './utils/api.js';
+import { explainPrompt, streamLLM } from './utils/api.js';
 
 // Setup Context Menus
 chrome.runtime.onInstalled.addListener(() => {
@@ -50,14 +50,18 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
   try {
     const prompts = explainPrompt(text, mode);
-    const result = await callLLM(prompts.system, prompts.user);
+    const stream = streamLLM(prompts.system, prompts.user);
     
-    // Send result to content script
-    chrome.tabs.sendMessage(tab.id, { 
-      action: "update-floating-ui", 
-      result: result,
-      status: "success"
-    });
+    let fullText = "";
+    for await (const chunk of stream) {
+      fullText += chunk;
+      // Send partial result to content script
+      chrome.tabs.sendMessage(tab.id, { 
+        action: "update-floating-ui", 
+        result: fullText,
+        status: "success"
+      });
+    }
   } catch (error) {
     chrome.tabs.sendMessage(tab.id, { 
       action: "update-floating-ui", 

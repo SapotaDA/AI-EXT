@@ -1,4 +1,4 @@
-import { getApiKey, callLLM, summarizePrompt, qaPrompt } from '../utils/api.js';
+import { getApiKey, streamLLM, summarizePrompt, qaPrompt } from '../utils/api.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Tab Switching
@@ -38,15 +38,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Inject content script if not already injected
     try {
       const response = await chrome.tabs.sendMessage(tab.id, { action: "get-page-content" });
-      return response.content;
+      return { content: response.content, url: tab.url };
     } catch (e) {
-      // Content script might not be injected yet
       await chrome.scripting.executeScript({
         target: { tabId: tab.id },
         files: ['content.js']
       });
       const response = await chrome.tabs.sendMessage(tab.id, { action: "get-page-content" });
-      return response.content;
+      return { content: response.content, url: tab.url };
     }
   }
 
@@ -70,16 +69,39 @@ document.addEventListener('DOMContentLoaded', () => {
     summarizeResultContainer.classList.add('hidden');
 
     try {
-      const content = await getActiveTabContent();
+      const { content, url } = await getActiveTabContent();
       if (!content || content.length < 50) {
         throw new Error("Could not extract enough content from this page.");
       }
 
-      const prompts = summarizePrompt(content);
-      const result = await callLLM(prompts.system, prompts.user);
+      // Smart Caching check
+      const cacheKey = "summary_" + url;
+      const cached = await new Promise(resolve => chrome.storage.local.get([cacheKey], res => resolve(res[cacheKey])));
       
-      summarizeResult.innerHTML = formatMarkdown(result);
-      summarizeResultContainer.classList.remove('hidden');
+      if (cached) {
+        summarizeResult.innerHTML = formatMarkdown(cached);
+        summarizeLoading.classList.add('hidden');
+        summarizeResultContainer.classList.remove('hidden');
+        summarizeBtn.disabled = false;
+        return;
+      }
+
+      const prompts = summarizePrompt(content);
+      const stream = streamLLM(prompts.system, prompts.user);
+      
+      let fullText = "";
+      for await (const chunk of stream) {
+        if (fullText === "") {
+          summarizeLoading.classList.add('hidden');
+          summarizeResultContainer.classList.remove('hidden');
+        }
+        fullText += chunk;
+        summarizeResult.innerHTML = formatMarkdown(fullText);
+      }
+      
+      // Save to cache
+      chrome.storage.local.set({ [cacheKey]: fullText });
+
     } catch (error) {
       summarizeResult.innerHTML = `<span style="color: red;">Error: ${error.message}</span>`;
       summarizeResultContainer.classList.remove('hidden');
@@ -111,24 +133,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const question = chatInput.value.trim();
     if (!question) return;
 
-    // Add user message
     appendMessage(question, 'user-msg');
     chatInput.value = '';
     chatInput.disabled = true;
     chatSendBtn.disabled = true;
 
-    // Add loading message
     const loadingId = appendMessage('Thinking...', 'system-msg');
 
     try {
       if (!pageContentCache) {
-        pageContentCache = await getActiveTabContent();
+        const { content } = await getActiveTabContent();
+        pageContentCache = content;
       }
 
       const prompts = qaPrompt(pageContentCache, question);
-      const answer = await callLLM(prompts.system, prompts.user);
+      const stream = streamLLM(prompts.system, prompts.user);
       
-      updateMessage(loadingId, formatMarkdown(answer));
+      let fullText = "";
+      for await (const chunk of stream) {
+        fullText += chunk;
+        updateMessage(loadingId, formatMarkdown(fullText));
+      }
+
     } catch (error) {
       updateMessage(loadingId, `<span style="color: red;">Error: ${error.message}</span>`);
     } finally {
