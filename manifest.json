@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "AI Research Assistant",
+  "version": "1.0",
+  "description": "Highlight to explain, summarize pages, and chat with webpage content.",
+  "permissions": [
+    "activeTab",
+    "contextMenus",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "css": ["content.css"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "AI Research Assistant"
+  }
+}
