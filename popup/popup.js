@@ -1,4 +1,4 @@
-import { getApiKey, getPreferredLanguage, streamLLM, summarizePrompt, qaPrompt } from '../utils/api.js';
+import { getApiKey, getPreferredLanguage, streamLLM, summarizePrompt } from '../utils/api.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Tab Switching
@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Copy Summary
+// Copy Summary
   document.getElementById('summarize-copy-btn').addEventListener('click', () => {
     const text = document.getElementById('summarize-result').innerText;
     navigator.clipboard.writeText(text);
@@ -138,87 +138,4 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.innerText = "Copied!";
     setTimeout(() => btn.innerText = "Copy", 2000);
   });
-
-  // Chat
-  const chatInput = document.getElementById('chat-input');
-  const chatSendBtn = document.getElementById('chat-send-btn');
-  const chatContainer = document.getElementById('chat-container');
-  let pageContentCache = null;
-
-  async function handleChat() {
-    const question = chatInput.value.trim();
-    if (!question) return;
-
-    appendMessage(question, 'user-msg');
-    chatInput.value = '';
-    chatInput.disabled = true;
-    chatSendBtn.disabled = true;
-
-    const loadingId = appendMessage('Thinking...', 'system-msg');
-
-    try {
-      if (!pageContentCache) {
-        const { content } = await getActiveTabContent();
-        pageContentCache = content;
-      }
-
-      // FIX: Read language from settings dropdown directly (works instantly, no save needed)
-      const lang = languageSelect.value;
-      const prompts = qaPrompt(pageContentCache, question, lang);
-      const stream = streamLLM(prompts.system, prompts.user);
-      
-      let fullText = "";
-      for await (const chunk of stream) {
-        fullText += chunk;
-        updateMessage(loadingId, formatMarkdown(fullText));
-      }
-
-    } catch (error) {
-      updateMessage(loadingId, `<span style="color: red;">Error: ${error.message}</span>`);
-    } finally {
-      chatInput.disabled = false;
-      chatSendBtn.disabled = false;
-      chatInput.focus();
-    }
-  }
-
-  chatSendBtn.addEventListener('click', handleChat);
-  chatInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleChat();
-  });
-
-  function appendMessage(text, className) {
-    const msgDiv = document.createElement('div');
-    msgDiv.className = `message ${className}`;
-    
-    const avatar = document.createElement('div');
-    avatar.className = 'msg-avatar';
-    avatar.textContent = className === 'user-msg' ? '👤' : '🤖';
-    
-    const bubble = document.createElement('div');
-    bubble.className = 'msg-bubble';
-    bubble.innerHTML = text;
-    
-    msgDiv.appendChild(avatar);
-    msgDiv.appendChild(bubble);
-    
-    const id = 'msg-' + Date.now();
-    msgDiv.id = id;
-    chatContainer.appendChild(msgDiv);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-    return id;
-  }
-
-  function updateMessage(id, text) {
-    const msgDiv = document.getElementById(id);
-    if (msgDiv) {
-      const bubble = msgDiv.querySelector('.msg-bubble');
-      if (bubble) {
-        bubble.innerHTML = text;
-      } else {
-        msgDiv.innerHTML = text;
-      }
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
-  }
 });

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "AI Research Assistant",
   "version": "1.0",
-  "description": "Highlight to explain, summarize pages, and chat with webpage content.",
+"description": "AI-powered tool to explain, summarize pages, and translate content.",
   "permissions": [
     "activeTab",
     "contextMenus",
