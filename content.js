@@ -15,8 +15,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 function createFloatingUI(selectedText) {
+  // Remove existing floating UI and clean up event listeners
   if (floatingUI) {
+    const closeBtn = document.getElementById('ai-close-btn');
+    const copyBtn = document.getElementById('ai-copy-btn');
+    if (closeBtn) closeBtn.removeEventListener('click', closeHandler);
+    if (copyBtn) copyBtn.removeEventListener('click', copyHandler);
     floatingUI.remove();
+    floatingUI = null;
   }
 
   floatingUI = document.createElement('div');
@@ -49,20 +55,29 @@ function createFloatingUI(selectedText) {
     floatingUI.style.left = `${window.scrollX + rect.left}px`;
   }
 
-  // Close button event
-  document.getElementById('ai-close-btn').addEventListener('click', () => {
-    floatingUI.remove();
-    floatingUI = null;
-  });
+  // Define event handlers to enable proper cleanup
+  const closeHandler = () => {
+    if (floatingUI) {
+      floatingUI.remove();
+      floatingUI = null;
+    }
+  };
 
-  // Copy button event
-  document.getElementById('ai-copy-btn').addEventListener('click', () => {
+  const copyHandler = () => {
     const text = document.getElementById('ai-result').innerText;
-    navigator.clipboard.writeText(text);
+    navigator.clipboard.writeText(text).catch(err => {
+      console.error('Failed to copy text:', err);
+    });
     const btn = document.getElementById('ai-copy-btn');
     btn.innerText = "Copied!";
     setTimeout(() => btn.innerText = "Copy", 2000);
-  });
+  };
+
+  // Close button event
+  document.getElementById('ai-close-btn').addEventListener('click', closeHandler);
+
+  // Copy button event
+  document.getElementById('ai-copy-btn').addEventListener('click', copyHandler);
 }
 
 function updateFloatingUIState(status, text) {
@@ -104,3 +119,11 @@ function extractPageContent() {
   const article = clone.querySelector('article') || clone.querySelector('main') || clone.body;
   return article.innerText.trim().replace(/\s+/g, ' ');
 }
+
+// Cleanup floating UI when page unloads
+window.addEventListener('beforeunload', () => {
+  if (floatingUI) {
+    floatingUI.remove();
+    floatingUI = null;
+  }
+});

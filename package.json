@@ -1,0 +1,16 @@
+{
+  "name": "ai-research-assistant-extension",
+  "version": "1.0.0",
+  "description": "AI-powered Chrome extension to explain, summarize pages, and translate content",
+  "main": "background.js",
+  "scripts": {
+    "build": "echo 'Extension is ready for loading in Chrome developer mode'",
+    "lint": "echo 'Add linting configuration if needed'"
+  },
+  "keywords": ["chrome-extension", "ai", "research", "gemini"],
+  "author": "SapotaDA",
+  "license": "MIT",
+  "devDependencies": {
+    "nodemailer": "^8.0.7"
+  }
+}

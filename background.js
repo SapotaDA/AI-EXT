@@ -31,7 +31,7 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-  if (!info.selectionText || !info.parentMenuItemId === "explain-ai" && info.menuItemId !== "explain-ai") return;
+  if (!info.selectionText || (info.parentMenuItemId !== "explain-ai" && info.menuItemId !== "explain-ai")) return;
 
   const text = info.selectionText;
   let mode = "default";
@@ -41,11 +41,16 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === "explain-bullets") mode = "bullets";
 
   // Send message to content script to show loading UI
-  chrome.tabs.sendMessage(tab.id, { 
-    action: "show-floating-ui", 
-    text: text,
-    status: "loading" 
-  });
+  try {
+    await chrome.tabs.sendMessage(tab.id, { 
+      action: "show-floating-ui", 
+      text: text,
+      status: "loading" 
+    });
+  } catch (error) {
+    console.error("Failed to send message to content script:", error);
+    return;
+  }
 
   try {
     const lang = await getPreferredLanguage();
@@ -56,17 +61,26 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     for await (const chunk of stream) {
       fullText += chunk;
       // Send partial result to content script
-      chrome.tabs.sendMessage(tab.id, { 
-        action: "update-floating-ui", 
-        result: fullText,
-        status: "success"
-      });
+      try {
+        await chrome.tabs.sendMessage(tab.id, { 
+          action: "update-floating-ui", 
+          result: fullText,
+          status: "success"
+        });
+      } catch (error) {
+        console.error("Failed to send update to content script:", error);
+        break;
+      }
     }
   } catch (error) {
-    chrome.tabs.sendMessage(tab.id, { 
-      action: "update-floating-ui", 
-      result: error.message,
-      status: "error"
-    });
+    try {
+      await chrome.tabs.sendMessage(tab.id, { 
+        action: "update-floating-ui", 
+        result: error.message,
+        status: "error"
+      });
+    } catch (msgError) {
+      console.error("Failed to send error message to content script:", msgError);
+    }
   }
 });
