@@ -158,6 +158,7 @@ body {
   font-weight: 700;
   letter-spacing: -0.3px;
   background: linear-gradient(135deg, #fff 0%, #c7d2fe 100%);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -255,21 +256,292 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== Scrollbar ===== */
+/* ===== Enhanced Micro-interactions ===== */
+.primary-btn, .glow-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.primary-btn::after,
+.glow-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.primary-btn:active::after,
+.glow-btn:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* ===== Enhanced Dropdown Styling ===== */
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper::after {
+  content: '▼';
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--accent-3);
+  font-size: 10px;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.action-bar .dropdown-input:hover + .select-wrapper::after,
+.action-bar .dropdown-input:focus + .select-wrapper::after {
+  color: var(--accent-1);
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* ===== Enhanced Loading States ===== */
+.loading-container {
+  position: relative;
+}
+
+.loading-container::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  right: -20px;
+  bottom: -20px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
+  animation: loadingPulse 2s ease-in-out infinite;
+}
+
+@keyframes loadingPulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.95); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+/* ===== Enhanced Card Interactions ===== */
+.result-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.result-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 2px;
+  background: var(--gradient-primary);
+  animation: progressSlide 2s ease-in-out infinite;
+}
+
+@keyframes progressSlide {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* ===== Enhanced Settings Cards ===== */
+.settings-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.settings-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gradient-primary);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.settings-card:hover::before {
+  transform: scaleX(1);
+}
+
+/* ===== Enhanced Button Groups ===== */
+.action-bar {
+  position: relative;
+}
+
+.action-bar::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background: var(--gradient-primary);
+  transition: all 0.3s ease;
+}
+
+.action-bar:focus-within::after {
+  width: 100%;
+}
+
+/* ===== Enhanced Scrollbar Styling ===== */
 .tab-content::-webkit-scrollbar,
 .markdown-content::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
 }
 
 .tab-content::-webkit-scrollbar-track,
 .markdown-content::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 3px;
 }
 
 .tab-content::-webkit-scrollbar-thumb,
 .markdown-content::-webkit-scrollbar-thumb {
-  background: var(--accent-1);
-  border-radius: 4px;
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  border-radius: 3px;
+  transition: all 0.2s ease;
+}
+
+.tab-content::-webkit-scrollbar-thumb:hover,
+.markdown-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
+  transform: scaleY(1.2);
+}
+
+/* ===== Enhanced Focus States ===== */
+.settings-card input:focus,
+.settings-card .dropdown-input:focus,
+.action-bar .dropdown-input:focus {
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15), 0 0 20px rgba(99, 102, 241, 0.1);
+}
+
+/* ===== Enhanced Hover Effects ===== */
+.tab-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.tab-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  transition: all 0.4s ease;
+  border-radius: 50%;
+}
+
+.tab-btn:hover::before {
+  width: 100px;
+  height: 100px;
+}
+
+/* ===== Enhanced Status Messages ===== */
+.status-msg {
+  position: relative;
+  overflow: hidden;
+}
+
+.status-msg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.2), transparent);
+  animation: statusShimmer 2s ease-in-out infinite;
+}
+
+@keyframes statusShimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* ===== Enhanced Copy Button ===== */
+.copy-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.copy-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(99, 102, 241, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.3s ease;
+}
+
+.copy-btn:hover::before {
+  width: 100%;
+  height: 100%;
+}
+
+.copy-btn.copied {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: var(--success);
+  animation: copySuccess 0.6s ease;
+}
+
+@keyframes copySuccess {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* ===== Enhanced Responsive Design ===== */
+@media (max-width: 380px) {
+  body {
+    width: 100%;
+    height: 100vh;
+  }
+  
+  .action-bar {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .action-bar .primary-btn {
+    width: 100%;
+  }
+}
+
+/* ===== Enhanced Accessibility ===== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===== Enhanced Dark Mode ===== */
+@media (prefers-color-scheme: dark) {
+  .loading-container::before {
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%);
+  }
+  
+  .tab-content::-webkit-scrollbar-track,
+  .markdown-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+  }
 }
 
 /* ===== Action Bar (Summarize Tab) ===== */

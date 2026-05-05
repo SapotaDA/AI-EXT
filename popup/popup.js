@@ -133,9 +133,32 @@ document.addEventListener('DOMContentLoaded', () => {
 // Copy Summary
   document.getElementById('summarize-copy-btn').addEventListener('click', () => {
     const text = document.getElementById('summarize-result').innerText;
-    navigator.clipboard.writeText(text);
     const btn = document.getElementById('summarize-copy-btn');
-    btn.innerText = "Copied!";
-    setTimeout(() => btn.innerText = "Copy", 2000);
+    
+    navigator.clipboard.writeText(text).then(() => {
+      // Add success state
+      btn.classList.add('copied');
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Copied!';
+      
+      // Add ripple effect to result card
+      const resultCard = document.querySelector('.result-card');
+      if (resultCard) {
+        resultCard.style.animation = 'none';
+        setTimeout(() => {
+          resultCard.style.animation = 'copySuccess 0.6s ease';
+        }, 10);
+      }
+      
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy';
+      }, 2000);
+    }).catch(err => {
+      console.error('Failed to copy:', err);
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> Failed';
+      setTimeout(() => {
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy';
+      }, 2000);
+    });
   });
 });

@@ -65,12 +65,32 @@ function createFloatingUI(selectedText) {
 
   const copyHandler = () => {
     const text = document.getElementById('ai-result').innerText;
-    navigator.clipboard.writeText(text).catch(err => {
-      console.error('Failed to copy text:', err);
-    });
     const btn = document.getElementById('ai-copy-btn');
-    btn.innerText = "Copied!";
-    setTimeout(() => btn.innerText = "Copy", 2000);
+    
+    navigator.clipboard.writeText(text).then(() => {
+      // Add success animation
+      btn.classList.add('copied');
+      btn.innerHTML = '✓ Copied!';
+      
+      // Add pulse effect to the entire UI
+      if (floatingUI) {
+        floatingUI.style.animation = 'ai-pulse-glow 0.6s ease';
+        setTimeout(() => {
+          if (floatingUI) {
+            floatingUI.style.animation = '';
+          }
+        }, 600);
+      }
+      
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = 'Copy';
+      }, 2000);
+    }).catch(err => {
+      console.error('Failed to copy text:', err);
+      btn.innerHTML = '❌ Failed';
+      setTimeout(() => btn.innerHTML = 'Copy', 2000);
+    });
   };
 
   // Close button event
