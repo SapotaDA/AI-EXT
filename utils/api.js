@@ -109,6 +109,50 @@ export const explainPrompt = (text, mode, lang = "English") => {
   };
 };
 
+export const translatePrompt = (text, targetLang, sourceLang = 'auto') => {
+  return {
+    system: `You are a professional translator. Translate the given text accurately while preserving the original meaning, tone, and context. If the text is already in the target language, return it as-is. IMPORTANT: Respond ONLY with the translated text, no explanations or notes.`,
+    user: `Source Language: ${sourceLang}\nTarget Language: ${targetLang}\nText to translate: "${text}"`
+  };
+};
+
+export const qaPrompt = (context, question, lang = "English") => {
+  return {
+    system: `You are an intelligent AI assistant. Answer the user's question based on the provided context. If the context doesn't contain the answer, say so clearly. Be concise but thorough. IMPORTANT: You MUST respond entirely in ${lang}.`,
+    user: `Context:\n${context.substring(0, 8000)}\n\nQuestion: ${question}`
+  };
+};
+
+export const rewritePrompt = (text, style, lang = "English") => {
+  const styleInstructions = {
+    formal: "Rewrite this text in a formal, professional tone suitable for business communication.",
+    casual: "Rewrite this text in a casual, conversational tone suitable for social media or informal messages.",
+    simple: "Rewrite this text using simple words and short sentences for easy understanding.",
+    creative: "Rewrite this text in a creative, engaging style with vivid descriptions.",
+    academic: "Rewrite this text in an academic, scholarly tone with proper terminology."
+  };
+  
+  return {
+    system: `You are a skilled writer. ${styleInstructions[style] || styleInstructions.formal} Maintain the original meaning while improving clarity and flow. IMPORTANT: You MUST respond entirely in ${lang}.`,
+    user: `Original text: "${text}"`
+  };
+};
+
+export const codePrompt = (code, language, task, lang = "English") => {
+  const taskInstructions = {
+    explain: "Explain what this code does in detail, including its purpose and how it works.",
+    optimize: "Optimize this code for better performance and suggest improvements.",
+    debug: "Identify potential bugs or issues in this code and suggest fixes.",
+    convert: "Convert this code to a different programming language as requested.",
+    document: "Add comprehensive comments and documentation to this code."
+  };
+  
+  return {
+    system: `You are an expert software developer. ${taskInstructions[task] || taskInstructions.explain} Provide clear, actionable advice. IMPORTANT: You MUST respond entirely in ${lang}.`,
+    user: `Language: ${language}\nCode:\n\n\`\`\`${language}\n${code}\n\`\`\``
+  };
+};
+
 export const summarizePrompt = (content, lang = "English") => {
   return {
     system: `You are an expert reading comprehension AI and content summarizer. IMPORTANT: You MUST respond entirely in ${lang}. If the language is "Simple English", use extremely basic vocabulary.`,
@@ -125,9 +169,3 @@ Content: ${content.substring(0, 8000)}`
   };
 };
 
-export const qaPrompt = (context, question, lang = "English") => {
-  return {
-    system: `You are a strict AI assistant reading a specific document. Answer ONLY using the provided context. If the context does not contain the answer, say 'I cannot find the answer to this question in the page content.' Do not use outside knowledge. IMPORTANT: You MUST respond entirely in ${lang}. If the language is "Simple English", use extremely basic vocabulary.`,
-    user: `Context:\n${context.substring(0, 8000)}\n\nQuestion: ${question}`
-  };
-};

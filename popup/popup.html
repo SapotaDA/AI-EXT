@@ -40,6 +40,21 @@
         Summarize
       </button>
 
+      <button class="tab-btn" data-target="tab-translate">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8l6 6"></path><path d="M4 14l6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="M22 22l-5-10-5 10"></path><path d="M14 18h6"></path></svg>
+        Translate
+      </button>
+
+      <button class="tab-btn" data-target="tab-qa">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        Q&A
+      </button>
+
+      <button class="tab-btn" data-target="tab-rewrite">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        Rewrite
+      </button>
+
       <button class="tab-btn" data-target="tab-settings">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         Settings
@@ -97,6 +112,152 @@
 
 
 
+      <!-- Translate Tab -->
+      <div id="tab-translate" class="tab-content">
+        <div class="action-bar">
+          <div class="select-wrapper">
+            <select id="source-lang-select" class="dropdown-input">
+              <option value="auto">🔍 Auto-detect</option>
+              <option value="English">🇺🇸 English</option>
+              <option value="Spanish">🇪🇸 Spanish</option>
+              <option value="French">🇫🇷 French</option>
+              <option value="German">🇩🇪 German</option>
+              <option value="Chinese">🇨🇳 Chinese</option>
+              <option value="Japanese">🇯🇵 Japanese</option>
+              <option value="Hindi">🇮🇳 Hindi</option>
+            </select>
+          </div>
+          <div class="select-wrapper">
+            <select id="target-lang-select" class="dropdown-input">
+              <option value="English">🇺🇸 English</option>
+              <option value="Spanish">🇪🇸 Spanish</option>
+              <option value="French">🇫🇷 French</option>
+              <option value="German">🇩🇪 German</option>
+              <option value="Chinese">🇨🇳 Chinese</option>
+              <option value="Japanese">🇯🇵 Japanese</option>
+              <option value="Hindi">🇮🇳 Hindi</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="input-section">
+          <textarea id="translate-input" placeholder="Enter text to translate..." rows="4" class="text-input"></textarea>
+        </div>
+        
+        <button id="translate-btn" class="primary-btn glow-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8l6 6"></path><path d="M4 14l6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="M22 22l-5-10-5 10"></path><path d="M14 18h6"></path></svg>
+          Translate
+        </button>
+        
+        <div id="translate-loading" class="loading-container hidden">
+          <div class="pulse-loader">
+            <div class="pulse-ring"></div>
+            <div class="pulse-ring"></div>
+            <div class="pulse-ring"></div>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pulse-icon"><path d="M5 8l6 6"></path><path d="M4 14l6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="M22 22l-5-10-5 10"></path><path d="M14 18h6"></path></svg>
+          </div>
+          <span class="loading-text">Translating<span class="dot-anim">...</span></span>
+        </div>
+        
+        <div id="translate-result-container" class="result-card hidden">
+          <div class="result-header">
+            <div class="result-title-group">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8l6 6"></path><path d="M4 14l6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="M22 22l-5-10-5 10"></path><path d="M14 18h6"></path></svg>
+              <span class="result-title">Translation</span>
+            </div>
+            <button id="translate-copy-btn" class="copy-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copy
+            </button>
+          </div>
+          <div id="translate-result" class="markdown-content"></div>
+        </div>
+      </div>
+
+      <!-- Q&A Tab -->
+      <div id="tab-qa" class="tab-content">
+        <div class="input-section">
+          <textarea id="qa-question" placeholder="Ask a question about the current page..." rows="3" class="text-input"></textarea>
+        </div>
+        
+        <button id="qa-btn" class="primary-btn glow-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          Ask Question
+        </button>
+        
+        <div id="qa-loading" class="loading-container hidden">
+          <div class="pulse-loader">
+            <div class="pulse-ring"></div>
+            <div class="pulse-ring"></div>
+            <div class="pulse-ring"></div>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pulse-icon"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          </div>
+          <span class="loading-text">Analyzing page<span class="dot-anim">...</span></span>
+        </div>
+        
+        <div id="qa-result-container" class="result-card hidden">
+          <div class="result-header">
+            <div class="result-title-group">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              <span class="result-title">Answer</span>
+            </div>
+            <button id="qa-copy-btn" class="copy-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copy
+            </button>
+          </div>
+          <div id="qa-result" class="markdown-content"></div>
+        </div>
+      </div>
+
+      <!-- Rewrite Tab -->
+      <div id="tab-rewrite" class="tab-content">
+        <div class="action-bar">
+          <div class="select-wrapper">
+            <select id="rewrite-style-select" class="dropdown-input">
+              <option value="formal">📝 Formal</option>
+              <option value="casual">😊 Casual</option>
+              <option value="simple">📖 Simple</option>
+              <option value="creative">🎨 Creative</option>
+              <option value="academic">🎓 Academic</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="input-section">
+          <textarea id="rewrite-input" placeholder="Enter text to rewrite..." rows="4" class="text-input"></textarea>
+        </div>
+        
+        <button id="rewrite-btn" class="primary-btn glow-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+          Rewrite Text
+        </button>
+        
+        <div id="rewrite-loading" class="loading-container hidden">
+          <div class="pulse-loader">
+            <div class="pulse-ring"></div>
+            <div class="pulse-ring"></div>
+            <div class="pulse-ring"></div>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pulse-icon"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+          </div>
+          <span class="loading-text">Rewriting<span class="dot-anim">...</span></span>
+        </div>
+        
+        <div id="rewrite-result-container" class="result-card hidden">
+          <div class="result-header">
+            <div class="result-title-group">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              <span class="result-title">Rewritten Text</span>
+            </div>
+            <button id="rewrite-copy-btn" class="copy-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copy
+            </button>
+          </div>
+          <div id="rewrite-result" class="markdown-content"></div>
+        </div>
+      </div>
+
       <!-- Settings Tab -->
       <div id="tab-settings" class="tab-content">
         <div class="settings-card">
@@ -122,6 +283,44 @@
             <option value="Malayalam">🇮🇳 Malayalam (മലయാളം)</option>
           </select>
           <p class="help-text">Used for Chat tab and right-click Explain feature.</p>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-icon">🎤</div>
+          <label for="voice-input-toggle">
+            <input type="checkbox" id="voice-input-toggle" class="checkbox-input">
+            <span class="checkbox-label">Enable Voice Input</span>
+          </label>
+          <p class="help-text">Use microphone to input text instead of typing</p>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-icon">📊</div>
+          <label for="usage-tracking-toggle">
+            <input type="checkbox" id="usage-tracking-toggle" class="checkbox-input">
+            <span class="checkbox-label">Usage Tracking</span>
+          </label>
+          <p class="help-text">Track your AI usage statistics</p>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-icon">⚡</div>
+          <label for="auto-execute-toggle">
+            <input type="checkbox" id="auto-execute-toggle" class="checkbox-input">
+            <span class="checkbox-label">Auto-execute Actions</span>
+          </label>
+          <p class="help-text">Automatically execute actions without confirmation</p>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-icon">🎨</div>
+          <label for="theme-select">UI Theme</label>
+          <select id="theme-select" class="dropdown-input">
+            <option value="black">⚫ Pure Black</option>
+            <option value="dark">⬛ Dark Gray</option>
+            <option value="midnight">🌙 Midnight Blue</option>
+            <option value="purple">🟣 Purple</option>
+          </select>
         </div>
 
         <button id="save-settings-btn" class="primary-btn glow-btn save-btn">
