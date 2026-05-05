@@ -26,10 +26,6 @@
   "action": {
     "default_popup": "popup/popup.html",
     "default_title": "AI Research Assistant",
-    "default_popup_dimensions": {
-      "width": 380,
-      "height": 550
-    },
     "browser_style": false
   }
 }
